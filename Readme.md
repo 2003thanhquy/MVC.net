@@ -14,3 +14,9 @@
     + ViewData Key  = Value
     + ViewBag  Key  = Value  => dynamic (chay moi khoi tao)
     + TempData => chuyen message,.. , 1 lan huy
+
+## Areas
+-La ten dung de routing
+-la cau truc trong thu muc mvc
+-thiet lap Area cho controller bang [Area("AreaName")]
+-tao cau truc thu muc

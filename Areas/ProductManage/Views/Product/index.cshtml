@@ -1,0 +1,26 @@
+@using App.Models
+
+@model List<ProductModel>
+
+<h1>Day la Product Index</h1>
+
+<div class ="">
+    @foreach (var product in @Model)
+    {
+                    <p>
+            @product.Name
+                    </p>
+    }
+</div>
+
+@{
+    var routedata = new Dictionary<string,string>(){
+        {"name","quy"},
+        {"abc","123"},
+        };
+
+} 
+
+<a asp-all-route-data="routedata">Action</a>
+
+              

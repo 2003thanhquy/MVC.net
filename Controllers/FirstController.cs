@@ -47,6 +47,7 @@ public class  FirstController : Controller{
     public IActionResult xinchao1(){
         return View();
     }
+    [AcceptVerbs("Get")]
     public IActionResult ViewProduct(int? id){
         var product = _productService.Where(p => p.Id  == id.Value).FirstOrDefault();
         if(product == null){

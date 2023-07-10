@@ -1,0 +1,51 @@
+@using Microsoft.EntityFrameworkCore
+@using System.Data
+
+@inject AppDbContext dbcontext
+
+@{
+    ViewData["Title"]="Thong tin Db";
+    var connect = dbcontext.Database.GetDbConnection();
+    var dbname = connect.Database;
+    var can_connect  = dbcontext.Database.CanConnect();
+}
+
+
+<h1>Hello world</h1>
+<h2>
+    Thong tin conenct
+</h2>
+
+<p>Database : @dbname</p>
+<p>DataSource : @connect.DataSource</p>
+<p>State : @connect.State</p>
+
+@foreach(var migration in dbcontext.Database.GetPendingMigrations()){
+    <p>@migration (Pending)</p>
+}
+@foreach(var migration in dbcontext.Database.GetAppliedMigrations()){
+    <p>@migration </p>
+}
+@if(dbcontext.Database.GetPendingMigrations().Any()){
+
+    <form method="post">
+        <button class="btn btn-success" asp-action="Migrate">Cap nhat  db </button>
+    </form>
+    
+}
+
+@if(can_connect){
+    <h2>Cac table</h2>
+    await dbcontext.Database.OpenConnectionAsync();
+    var table = dbcontext.Database.GetDbConnection().GetSchema("Tables");
+    <ul>
+        @foreach(System.Data.DataRow row in table.Rows){
+            <li>@row["TABLE_NAME"]</li>
+        }
+    </ul>
+    <a class="btn btn-danger" asp-action="DeleteDb">xoa database : @dbname
+    </a>
+
+}
+
+
