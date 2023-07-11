@@ -1,0 +1,33 @@
+{
+  "name": "appmvc.net",
+  "version": "1.0.0",
+  "description": "- La mot lop ke thua lop Controller: Microsoft.AspNetCore.Mvc.Controller\r - Action trong controller la mot phuong thuc public (khong co static)\r -Action co the tra ve bat ki gi trong IActionResult\r - Cac dich vu inject vao controller qua ham tao",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/2003thanhquy/MVC.net.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/2003thanhquy/MVC.net/issues"
+  },
+  "homepage": "https://github.com/2003thanhquy/MVC.net#readme",
+  "dependencies": {
+    "gulp": "^4.0.2",
+    "gulp-concat": "^2.6.1",
+    "gulp-cssmin": "^0.2.0",
+    "gulp-less": "^5.0.0",
+    "gulp-postcss": "^9.0.1",
+    "gulp-rename": "^2.0.0",
+    "gulp-sass": "^5.1.0",
+    "gulp-uglify": "^3.0.2",
+    "node-sass": "^9.0.0",
+    "postcss": "^8.4.25",
+    "rimraf": "^5.0.1",
+    "sass": "^1.63.6"
+  }
+}

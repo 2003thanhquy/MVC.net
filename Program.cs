@@ -65,6 +65,12 @@ app.MapAreaControllerRoute(
     pattern:"{controller}/{action=Index}/{id?}"
 
 );
+// app.MapAreaControllerRoute(
+//     name :"Contact",
+//     areaName : "Contact",
+//     pattern:"{controller}/{action=Index}/{id?}"
+
+// );
 
 
 app.MapControllerRoute(

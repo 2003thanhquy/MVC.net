@@ -1,0 +1,3 @@
+dotnet aspnet-codegenerator controller -name Contact -namespace App.Areas.Contact.Controllers -m App.Models.Contacts.Contact -udl -dc App.Models.AppDbContext -outDir Areas/Contact/Controllers/
+
+npm install gulp
