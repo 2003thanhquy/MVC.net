@@ -41,9 +41,9 @@ namespace MVC.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<string>("HomeAddress")
-                        .HasMaxLength(255)
-                        .HasColumnType("LONGTEXT");
+                    b.Property<string>("HomeAdress")
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("tinyint(1)");

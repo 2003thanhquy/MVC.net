@@ -9,7 +9,7 @@
     var dbname = connect.Database;
     var can_connect  = dbcontext.Database.CanConnect();
 }
-
+<partial name ="_StatusMessage">
 
 <h1>Hello world</h1>
 <h2>
@@ -44,6 +44,8 @@
         }
     </ul>
     <a class="btn btn-danger" asp-action="DeleteDb">xoa database : @dbname
+    </a>
+     <a class="btn btn-danger" asp-action="SeedData">Seed Data
     </a>
 
 }

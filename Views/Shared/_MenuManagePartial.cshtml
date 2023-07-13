@@ -1,4 +1,11 @@
-<div class="dropdown show">
+@using Microsoft.AspNetCore.Authorization
+@inject IAuthorizationService authorizationService
+
+@{
+    var result= await authorizationService.AuthorizeAsync(this.User,"ViewManage");
+}
+@if(result.Succeeded){
+    <div class="dropdown show">
     <button class="btn btn-secondary dropdown-toggle" type="button" id="manageddropdownmenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
      Manage
   </button>
@@ -9,6 +16,15 @@
          <a  class="dropdown-item" asp-action="Index"  asp-controller="Contact" asp-area="Contact">
             Quan li lien he
         </a>
+
+         <a  class="dropdown-item" asp-action="Index"  asp-controller="Role" asp-area="Identity">
+            Quan li Role(vai tro)
+        </a>
+        <a  class="dropdown-item" asp-action="Index"  asp-controller="User" asp-area="Identity">
+            Quan li thanh vien
+        </a>
     </div>
 </div>
+}
+
 

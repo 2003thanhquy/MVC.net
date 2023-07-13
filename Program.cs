@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Routing.Constraints;
 using App.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
+using App.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +15,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddRazorPages();
+
+builder.Services.AddOptions();
+var mailsetting = builder.Configuration.GetSection("MailSettings");
+builder.Services.Configure<MailSettings>(mailsetting);
+builder.Services.AddSingleton<IEmailSender,SendMailService>();
 
 builder.Services.Configure<RazorViewEngineOptions>(option =>{
     //{0} ten action
@@ -86,8 +93,13 @@ builder.Services.AddAuthentication()
                     options.CallbackPath ="/dang-nhap-tu-facebook";
                 });
 
-
-
+builder.Services.AddSingleton<IdentityErrorDescriber,AppIdentityErrorDescriber>();
+builder.Services.AddAuthorization(options =>{
+    options.AddPolicy("ViewManage",builder =>{
+        builder.RequireAuthenticatedUser();
+        builder.RequireRole(RoleName.Administrator);
+    });
+});
 
 var app = builder.Build();
 
