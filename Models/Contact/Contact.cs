@@ -8,7 +8,7 @@ public class Contact {
     [Key]
     public int  Id {get;set;}
     [Required(ErrorMessage = "Phai nhap {0}")]
-    [Column(TypeName="longtext")]
+    [Column(TypeName="nvarchar")]
     [StringLength(50)]
     [DisplayName("Ho ten")]
     public string FullName{get;set;}
