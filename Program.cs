@@ -33,10 +33,11 @@ builder.Services.AddSingleton<PlanetService>();
 
 
 builder.Services.AddDbContext<AppDbContext>(options =>{
-    string connectString = builder.Configuration.GetConnectionString("AppMvcConnectString");
-    
-    var serverVersion = new MySqlServerVersion(new Version(8, 0, 33));
-    options.UseMySql(connectString, serverVersion);
+    //string connectString = builder.Configuration.GetConnectionString("AppMvcConnectString"); 
+    // var serverVersion = new MySqlServerVersion(new Version(8, 0, 33));
+    // options.UseMySql(connectString, serverVersion);
+    string connectString = builder.Configuration.GetConnectionString("AppMvc"); 
+    options.UseSqlServer(connectString);
 });
 
 builder.Services.AddIdentity<AppUser,IdentityRole>()
