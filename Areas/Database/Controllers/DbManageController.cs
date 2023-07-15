@@ -76,7 +76,7 @@ namespace MVC.Areas_Database_Controllers
                     EmailConfirmed = true,
                 };
 
-                await _userManager.CreateAsync(user,"admin123");
+                await _userManager.CreateAsync(user,"123");
                 await _userManager.AddToRoleAsync(user,RoleName.Administrator);
 
 
