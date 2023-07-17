@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace App.Models.Blog;
 [Table("Category")]
@@ -32,7 +32,8 @@ public class Category
     public string Slug { set; get; }
 
     // Các Category con
-    public ICollection<Category> CategoryChildren { get; set; }
+    
+    public ICollection<Category>? CategoryChildren { get; set; }
 
      // Category cha (FKey)
     [Display(Name = "Danh mục cha")]
@@ -40,8 +41,8 @@ public class Category
 
     [ForeignKey("ParentCategoryId")]
     [Display(Name = "Danh mục cha")]
+    [BindNever]
 
-
-    public Category ParentCategory { set; get; }
+    public Category? ParentCategory { set; get; }
 
 }

@@ -13,128 +13,149 @@ using App.Data;
 
 namespace App.Areas.Admin.Blog.Controllers
 {
-    [Area ("Blog")]
     [Authorize(Roles = RoleName.Administrator)]
-    [Route("admin/blog/category/[action]/{id}")]
-    public class CategoryController : Controller {
+    [Area("Blog")]
+    [Route("admin/blog/category/[action]/{id?}")]
+    public class CategoryController : Controller
+    {
         private readonly AppDbContext _context;
 
-        public CategoryController (AppDbContext context) {
+        public CategoryController(AppDbContext context)
+        {
             _context = context;
         }
 
         // GET: Admin/Category
-        public IActionResult Index () {
+        //[Route("admin")]
 
-            var items =  _context.Categories
-                .Include (c => c.CategoryChildren)   // <-- Nạp các Category con
-                .AsEnumerable()
-                .Where (c => c.ParentCategory == null)
-                .ToList();
-           
+        public async Task<IActionResult> Index()
+        {
 
-            return View (items);
+            var qr = (from c in _context.Categories select c)
+                    .Include(c => c.CategoryChildren)
+                    .Include(c => c.ParentCategory);
+            var categories = (await qr.ToListAsync())
+                            .Where(c => c.ParentCategory == null)
+                            .ToList();
+            return View(categories);
 
         }
 
         // GET: Admin/Category/Details/5
-        public async Task<IActionResult> Details (int? id) {
-            if (id == null) {
-                return NotFound ();
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
             }
 
             var category = await _context.Categories
-                .Include (c => c.ParentCategory)
-                .FirstOrDefaultAsync (m => m.Id == id);
-            if (category == null) {
-                return NotFound ();
+                .Include(c => c.ParentCategory)
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (category == null)
+            {
+                return NotFound();
+            }
+            Console.WriteLine($"day la details {category.Slug}");
+            return View(category);
+        }
+        private void CreateSelectItems(List<Category> source , List<Category> des,int level){
+            foreach(var category  in source){
+                
+               
+                des.Add(new Category(){
+                    Id  = category.Id,
+                    Title = string.Concat(Enumerable.Repeat("---",level))+ category.Title
+                });
+                if(category.CategoryChildren?.Count >0){
+                    CreateSelectItems(category.CategoryChildren.ToList(),des,level+1);
+                }
             }
 
-            return View (category);
         }
 
         // GET: Admin/Category/Create
-        public async Task<IActionResult> Create () {
+        public async Task<IActionResult> Create()
+        {
             // ViewData["ParentCategoryId"] = new SelectList(_context.Categories, "Id", "Slug");
-            var listcategory = await _context.Categories.ToListAsync ();
-            listcategory.Insert (0, new Category () {
+            var qr =(from c in _context.Categories select c)
+                    .Include(c =>c.CategoryChildren)
+                    .Include(c => c.ParentCategory);
+            var categories = (await qr.ToListAsync())
+                            .Where(c=>c.ParentCategory ==null)
+                            .ToList();    
+            categories.Insert(0, new Category()
+            {
                 Title = "Không có danh mục cha",
-                    Id = -1
+                Id = -1
             });
-            ViewData["ParentCategoryId"] = new SelectList (await GetItemsSelectCategorie(), "Id", "Title", -1);
-            return View ();
-        }
-
-        async Task<IEnumerable<Category>> GetItemsSelectCategorie() {
-
-            var items = await _context.Categories
-                                .Include(c => c.CategoryChildren)
-                                .Where(c => c.ParentCategory == null)
-                                .ToListAsync();
-
-
-
-            List<Category> resultitems = new List<Category>() {
-                new Category() {
-                    Id = -1,
-                    Title = "Không có danh mục cha"
-                }
-            };
-            Action<List<Category>, int> _ChangeTitleCategory = null;
-            Action<List<Category>, int> ChangeTitleCategory =  (items, level) => {
-                string prefix = String.Concat(Enumerable.Repeat("—", level));
-                foreach (var item in items) {
-                    item.Title = prefix + " " + item.Title; 
-                    resultitems.Add(item);
-                    if ((item.CategoryChildren != null) && (item.CategoryChildren.Count > 0)) {
-                        _ChangeTitleCategory(item.CategoryChildren.ToList(), level + 1);
-                    }
-                        
-                }
-                
-            };
-
-            _ChangeTitleCategory = ChangeTitleCategory;
-            ChangeTitleCategory(items, 0);
-
-            return resultitems;
+            var items =  new List<Category>();
+            CreateSelectItems(categories,items,0);
+            ViewData["ParentCategoryId"] = new SelectList(items, "Id", "Title", -1);
+            return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create ([Bind ("Id,Title,Description,Content,Slug,ParentCategoryId")] Category category) {
-            if (ModelState.IsValid) {
+        public async Task<IActionResult> Create([Bind("Id,Title,Description,Slug,ParentCategoryId")] Category category)
+        {
+            if (ModelState.IsValid)
+            {
                 if (category.ParentCategoryId.Value == -1)
                     category.ParentCategoryId = null;
-                _context.Add (category);
-                await _context.SaveChangesAsync ();
-                return RedirectToAction (nameof (Index));
+                _context.Add(category);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            else
+            {
+                var errors = ModelState.Values
+                            .SelectMany(v => v.Errors)
+                            .Select(e => e.ErrorMessage);
+                foreach (var error in errors)
+                {
+                    Console.WriteLine(error);
+                }
             }
 
             // ViewData["ParentCategoryId"] = new SelectList(_context.Categories, "Id", "Slug", category.ParentCategoryId);
-            var listcategory = await _context.Categories.ToListAsync ();
-            listcategory.Insert (0, new Category () {
+            var listcategory = await _context.Categories.ToListAsync();
+            listcategory.Insert(0, new Category()
+            {
                 Title = "Không có danh mục cha",
-                    Id = -1
+                Id = -1
             });
-            ViewData["ParentCategoryId"] = new SelectList (await GetItemsSelectCategorie(), "Id", "Title", category.ParentCategoryId);
-            return View (category);
+            //ViewData["ParentCategoryId"] = new SelectList(await GetItemsSelectCategorie(), "Id", "Title", category.ParentCategoryId);
+            return View(category);
         }
 
         // GET: Admin/Category/Edit/5
-        public async Task<IActionResult> Edit (int? id) {
-            if (id == null) {
-                return NotFound ();
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
             }
-
-            var category = await _context.Categories.FindAsync (id);
-            if (category == null) {
-                return NotFound ();
+            var category = await _context.Categories.FindAsync(id);
+            if(category == null){
+                return NotFound();
             }
-            
-            ViewData["ParentCategoryId"] = new SelectList (await GetItemsSelectCategorie(), "Id", "Title", category.ParentCategoryId);
+            var qr =(from c in _context.Categories select c)
+                    .Include(c =>c.CategoryChildren)
+                    .Include(c => c.ParentCategory);
+            var categories = (await qr.ToListAsync())
+                            .Where(c=>c.ParentCategory ==null)
+                            .ToList();    
+            categories.Insert(0, new Category()
+            {
+                Title = "Không có danh mục cha",
+                Id = -1
+            });
+            var items =  new List<Category>();
+            CreateSelectItems(categories,items,0);
+           ViewData["ParentCategoryId"] = new SelectList(items, "Id", "Title", -1);
 
-            return View (category);
+            return View(category);
         }
 
         // POST: Admin/Category/Edit/5
@@ -142,64 +163,90 @@ namespace App.Areas.Admin.Blog.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit (int id, [Bind ("Id,ParentCategoryId,Title,Content,Slug")] Category category) {
-            if (id != category.Id) {
-                return NotFound ();
+        public async Task<IActionResult> Edit(int id, [Bind("Id,ParentCategoryId,Title,Description,Slug")] Category category)
+        {
+            Console.WriteLine("day la edit post");
+            if (id != category.Id)
+            {
+                return NotFound();
             }
 
-            if (ModelState.IsValid) {
-                try {
-                    if (category.ParentCategoryId == -1) {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    if (category.ParentCategoryId == -1)
+                    {
                         category.ParentCategoryId = null;
                     }
-                    _context.Update (category);
-                    await _context.SaveChangesAsync ();
-                } catch (DbUpdateConcurrencyException) {
-                    if (!CategoryExists (category.Id)) {
-                        return NotFound ();
-                    } else {
+                    _context.Update(category);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!CategoryExists(category.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
                         throw;
                     }
                 }
-                return RedirectToAction (nameof (Index));
+                return RedirectToAction(nameof(Index));
             }
-            var listcategory = await _context.Categories.ToListAsync ();
-            listcategory.Insert (0, new Category () {
+            var listcategory = await _context.Categories.ToListAsync();
+            listcategory.Insert(0, new Category()
+            {
                 Title = "Không có danh mục cha",
-                    Id = -1
+                Id = -1
             });
-            ViewData["ParentCategoryId"] = new SelectList (listcategory, "Id", "Title", category.ParentCategoryId);
-            return View (category);
+            ViewData["ParentCategoryId"] = new SelectList(listcategory, "Id", "Title", category.ParentCategoryId);
+            return View(category);
         }
 
         // GET: Admin/Category/Delete/5
-        public async Task<IActionResult> Delete (int? id) {
-            if (id == null) {
-                return NotFound ();
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
             }
 
             var category = await _context.Categories
-                .Include (c => c.ParentCategory)
-                .FirstOrDefaultAsync (m => m.Id == id);
-            if (category == null) {
-                return NotFound ();
+                .Include(c => c.ParentCategory)
+                .FirstOrDefaultAsync(m => m.Id == id);
+            
+            if (category == null)
+            {
+                return NotFound();
             }
 
-            return View (category);
+            return View(category);
         }
 
         // POST: Admin/Category/Delete/5
-        [HttpPost, ActionName ("Delete")]
+        [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed (int id) {
-            var category = await _context.Categories.FindAsync (id);
-            _context.Categories.Remove (category);
-            await _context.SaveChangesAsync ();
-            return RedirectToAction (nameof (Index));
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var category = await _context.Categories
+                .Include(c => c.CategoryChildren)
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if(category == null){
+                return NotFound();
+            }
+            foreach(var categoryChild in category.CategoryChildren){
+                categoryChild.ParentCategoryId = category.ParentCategoryId;
+            } 
+            _context.Categories.Remove(category);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
-        private bool CategoryExists (int id) {
-            return _context.Categories.Any (e => e.Id == id);
+        private bool CategoryExists(int id)
+        {
+            return _context.Categories.Any(e => e.Id == id);
         }
     }
 }

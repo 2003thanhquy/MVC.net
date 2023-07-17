@@ -81,6 +81,7 @@ namespace MVC.Areas_Database_Controllers
 
 
             }
+            
             StatusMessage ="Vua seed database";
             return  RedirectToAction("Index");
         }
