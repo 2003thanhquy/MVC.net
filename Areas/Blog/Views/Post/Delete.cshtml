@@ -1,0 +1,20 @@
+@model App.Models.Blog.Post
+
+@{
+    ViewData["Title"] = "Xoa bai viet";
+    Layout = "_Layout";
+}
+
+<h1>Xóa danh mục</h1>
+
+<h3>Có chắc chắn xóa danh mục?</h3>
+<p>Ban co chac chan xoa ?</p>
+<h4>@Model.Title</h4>
+<div>
+    
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="PostId" />
+        <input type="submit" value="Xóa" class="btn btn-danger" /> |
+        <a asp-action="Index">Danh sach bai viet</a>
+    </form>
+</div>

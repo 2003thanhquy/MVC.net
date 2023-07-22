@@ -59,38 +59,57 @@ namespace App.Areas.Admin.Blog.Controllers
             Console.WriteLine($"day la details {category.Slug}");
             return View(category);
         }
-        private void CreateSelectItems(List<Category> source , List<Category> des,int level){
-            foreach(var category  in source){
-                
-               
-                des.Add(new Category(){
-                    Id  = category.Id,
-                    Title = string.Concat(Enumerable.Repeat("---",level))+ category.Title
+        private void CreateSelectItems(List<Category> source, List<Category> des, int level)
+        {
+            foreach (var category in source)
+            {
+
+
+                des.Add(new Category()
+                {
+                    Id = category.Id,
+                    Title = string.Concat(Enumerable.Repeat("---", level)) + category.Title,
+                    ParentCategoryId = category.ParentCategoryId
                 });
-                if(category.CategoryChildren?.Count >0){
-                    CreateSelectItems(category.CategoryChildren.ToList(),des,level+1);
+                if (category.CategoryChildren?.Count > 0)
+                {
+                    CreateSelectItems(category.CategoryChildren.ToList(), des, level + 1);
                 }
             }
 
+        }
+        private List<Category> RemoveChildren(List<Category> source, List<Category> des)
+        {
+            //List<Category> updatedDes = new List<Category>(des);
+            
+            foreach (var category in source)
+            {;
+               des = des.Where(c =>c.Id != category.Id).ToList();
+                if (category.CategoryChildren?.Count > 0)
+                {
+                    des = RemoveChildren(category.CategoryChildren.ToList(), des);
+                }
+            }
+            return des;
         }
 
         // GET: Admin/Category/Create
         public async Task<IActionResult> Create()
         {
             // ViewData["ParentCategoryId"] = new SelectList(_context.Categories, "Id", "Slug");
-            var qr =(from c in _context.Categories select c)
-                    .Include(c =>c.CategoryChildren)
+            var qr = (from c in _context.Categories select c)
+                    .Include(c => c.CategoryChildren)
                     .Include(c => c.ParentCategory);
             var categories = (await qr.ToListAsync())
-                            .Where(c=>c.ParentCategory ==null)
-                            .ToList();    
+                            .Where(c => c.ParentCategory == null)
+                            .ToList();
             categories.Insert(0, new Category()
             {
                 Title = "Không có danh mục cha",
                 Id = -1
             });
-            var items =  new List<Category>();
-            CreateSelectItems(categories,items,0);
+            var items = new List<Category>();
+            CreateSelectItems(categories, items, 0);
             ViewData["ParentCategoryId"] = new SelectList(items, "Id", "Title", -1);
             return View();
         }
@@ -137,23 +156,30 @@ namespace App.Areas.Admin.Blog.Controllers
                 return NotFound();
             }
             var category = await _context.Categories.FindAsync(id);
-            if(category == null){
+            if (category == null)
+            {
                 return NotFound();
             }
-            var qr =(from c in _context.Categories select c)
-                    .Include(c =>c.CategoryChildren)
+            var qr = (from c in _context.Categories select c)
+                    .Include(c => c.CategoryChildren)
                     .Include(c => c.ParentCategory);
             var categories = (await qr.ToListAsync())
-                            .Where(c=>c.ParentCategory ==null)
-                            .ToList();    
+                            .Where(c => c.ParentCategory == null)
+                            .ToList();
             categories.Insert(0, new Category()
             {
                 Title = "Không có danh mục cha",
                 Id = -1
             });
-            var items =  new List<Category>();
-            CreateSelectItems(categories,items,0);
-           ViewData["ParentCategoryId"] = new SelectList(items, "Id", "Title", -1);
+            var items = new List<Category>();
+            CreateSelectItems(categories, items, 0);
+            Console.WriteLine(items.Count);
+            if (category.CategoryChildren?.Count > 0)
+            {
+               items = RemoveChildren(category.CategoryChildren.ToList(), items);
+            }
+            Console.WriteLine(items.Count);
+            ViewData["ParentCategoryId"] = new SelectList(items, "Id", "Title", -1);
 
             return View(category);
         }
@@ -216,7 +242,7 @@ namespace App.Areas.Admin.Blog.Controllers
             var category = await _context.Categories
                 .Include(c => c.ParentCategory)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            
+
             if (category == null)
             {
                 return NotFound();
@@ -233,12 +259,14 @@ namespace App.Areas.Admin.Blog.Controllers
             var category = await _context.Categories
                 .Include(c => c.CategoryChildren)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if(category == null){
+            if (category == null)
+            {
                 return NotFound();
             }
-            foreach(var categoryChild in category.CategoryChildren){
+            foreach (var categoryChild in category.CategoryChildren)
+            {
                 categoryChild.ParentCategoryId = category.ParentCategoryId;
-            } 
+            }
             _context.Categories.Remove(category);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));

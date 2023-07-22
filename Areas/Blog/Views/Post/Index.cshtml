@@ -1,0 +1,60 @@
+@model IEnumerable<App.Models.Blog.Post>
+
+@{
+    ViewData["Title"] = "Day  la danh sach bai viet";   
+}
+<partial name="_StatusMessage">
+<h1>@ViewData["Title"]</h1>
+<p>
+    <a asp-action="Create">Tạo chuyên mục mới</a>
+</p>
+<p>Tong so bai viet @ViewBag.totalPosts</p>
+<table class="table">
+    <thead>
+        <tr>
+            <tr>
+                STT
+            </tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Title)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Published)
+            </th>
+             <th>
+                @Html.DisplayNameFor(model => model.Author)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DateUpdated)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+       @foreach(var post in Model){
+        <tr>
+            <td>
+               @(++ViewBag.postIndex) 
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@post.PostId"> @post.Title</a>
+                <br>
+                <small>
+                     @string.Join(",", post.PostCategories.Select(c => c.Category.Title))
+                </small>
+               
+            </td>
+             <td>@post.Published</td>
+             <td>@post.Author?.UserName</td>
+             <td>@post.DateUpdated</td>
+             <td>
+                    
+                    <a asp-action="Details" asp-route-id="@post.PostId">Chi tiet</a> |
+                    <a asp-action="Delete" asp-route-id="@post.PostId">Xoa</a>
+            </td>
+        </tr>
+       }
+
+    </tbody>
+</table>
+
+ <partial name="_PagingXTL" model="@ViewBag.pagingModel" /> 
