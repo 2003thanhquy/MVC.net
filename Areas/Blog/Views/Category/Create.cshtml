@@ -10,7 +10,7 @@
 <h4>Tạo danh mục Blog</h4>
 <hr />
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-6">
         <form asp-action="Create" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
              <div class="form-group">
@@ -43,3 +43,9 @@
     <a asp-action="Index">Quay lại danh sách</a>
 </div>
 
+@{
+    var summernote =  new App.Models.Summernote("#Description");
+ 
+}
+<partial name="_Summernote" model="summernote" />
+```
